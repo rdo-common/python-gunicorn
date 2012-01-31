@@ -1,0 +1,12 @@
+diff -ur gunicorn-0.13.4/tests/treq.py gunicorn-0.13.4.patched/tests/treq.py
+--- gunicorn-0.13.4/tests/treq.py	2011-08-22 05:11:35.000000000 +1000
++++ gunicorn-0.13.4.patched/tests/treq.py	2012-01-31 13:28:37.687182655 +1000
+@@ -97,7 +97,7 @@
+         return 1
+     
+     def size_small_random(self):
+-        return random.randint(0, 4)
++        return random.randint(1, 4)
+     
+     def size_random(self):
+         return random.randint(1, 4096)

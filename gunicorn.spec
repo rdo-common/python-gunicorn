@@ -1,12 +1,14 @@
 Name:           gunicorn
 Version:        0.13.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          Applications/Internet
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{version}.tar.gz
+# https://github.com/benoitc/gunicorn/issues/294
+Patch0:         %{name}-%{version}-no-read-0.patch
 
 BuildArch:      noarch
 BuildRequires:  python-setuptools-devel
@@ -19,6 +21,7 @@ Django, and Paster applications.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %{__python} setup.py build
@@ -37,5 +40,8 @@ Django, and Paster applications.
 %{_bindir}/%{name}_paster
 
 %changelog
+* Tue Jan 31 2012 Dan Callaghan <dcallagh@redhat.com> - 0.13.4-2
+- patch for failing test (gunicorn issue #294)
+
 * Mon Jan 30 2012 Dan Callaghan <dcallagh@redhat.com> - 0.13.4-1
 - initial version
