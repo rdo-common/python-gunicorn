@@ -1,9 +1,12 @@
-Name:           gunicorn
+
+%global upstream_name gunicorn
+
+Name:           python-gunicorn
 Version:        0.13.4
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Python WSGI application server
 
-Group:          Applications/Internet
+Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{version}.tar.gz
@@ -11,7 +14,8 @@ Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{ver
 Patch0:         %{name}-%{version}-no-read-0.patch
 
 BuildArch:      noarch
-BuildRequires:  python-setuptools-devel
+BuildRequires:  python2-devel
+BuildRequires:  python-setuptools
 BuildRequires:  python-nose
 
 %description
@@ -20,7 +24,7 @@ pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI,
 Django, and Paster applications.
 
 %prep
-%setup -q
+%setup -q -n %{upstream_name}-%{version}
 %patch0 -p1
 
 %build
@@ -34,12 +38,15 @@ Django, and Paster applications.
 
 %files
 %doc LICENSE NOTICE README.rst THANKS
-%{python_sitelib}/%{name}*
-%{_bindir}/%{name}
-%{_bindir}/%{name}_django
-%{_bindir}/%{name}_paster
+%{python_sitelib}/%{upstream_name}*
+%{_bindir}/%{upstream_name}
+%{_bindir}/%{upstream_name}_django
+%{_bindir}/%{upstream_name}_paster
 
 %changelog
+* Wed Feb 08 2012 Dan Callaghan <dcallagh@redhat.com> - 0.13.4-3
+- renamed package to python-gunicorn, and other minor fixes
+
 * Tue Jan 31 2012 Dan Callaghan <dcallagh@redhat.com> - 0.13.4-2
 - patch for failing test (gunicorn issue #294)
 
