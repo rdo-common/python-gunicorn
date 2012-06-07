@@ -2,16 +2,14 @@
 %global upstream_name gunicorn
 
 Name:           python-gunicorn
-Version:        0.13.4
-Release:        3%{?dist}
+Version:        0.14.3
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{version}.tar.gz
-# https://github.com/benoitc/gunicorn/issues/294
-Patch0:         %{name}-%{version}-no-read-0.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -25,7 +23,6 @@ Django, and Paster applications.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
-%patch0 -p1
 
 %build
 %{__python} setup.py build
@@ -44,6 +41,9 @@ Django, and Paster applications.
 %{_bindir}/%{upstream_name}_paster
 
 %changelog
+* Thu Jun 07 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14.3-1
+- updated to upstream release 0.14.3
+
 * Wed Feb 08 2012 Dan Callaghan <dcallagh@redhat.com> - 0.13.4-3
 - renamed package to python-gunicorn, and other minor fixes
 
