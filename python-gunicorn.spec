@@ -2,7 +2,7 @@
 %global upstream_name gunicorn
 
 Name:           python-gunicorn
-Version:        0.14.3
+Version:        0.14.5
 Release:        1%{?dist}
 Summary:        Python WSGI application server
 
@@ -41,6 +41,9 @@ Django, and Paster applications.
 %{_bindir}/%{upstream_name}_paster
 
 %changelog
+* Mon Jun 25 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14.5-1
+- upstream bugfix release 0.14.5
+
 * Thu Jun 07 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14.3-1
 - updated to upstream release 0.14.3
 
