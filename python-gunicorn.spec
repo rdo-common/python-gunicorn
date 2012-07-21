@@ -3,7 +3,7 @@
 
 Name:           python-gunicorn
 Version:        0.14.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -41,6 +41,9 @@ Django, and Paster applications.
 %{_bindir}/%{upstream_name}_paster
 
 %changelog
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.14.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Mon Jun 25 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14.5-1
 - upstream bugfix release 0.14.5
 
