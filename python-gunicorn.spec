@@ -10,6 +10,9 @@ Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{version}.tar.gz
+# https://github.com/benoitc/gunicorn/issues/390
+# https://github.com/benoitc/gunicorn/commit/4b478e1a6651f33b36e30294c5a320388ed527f4
+Patch1:         %{name}-0.14.6-LimitRequestLine.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -23,6 +26,7 @@ Django, and Paster applications.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
+%patch1 -p1
 
 %build
 %{__python} setup.py build
@@ -41,6 +45,9 @@ Django, and Paster applications.
 %{_bindir}/%{upstream_name}_paster
 
 %changelog
+* Mon Aug 20 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14-6-2
+- fix for LimitRequestLine test failure (upstream issue #390)
+
 * Wed Aug 01 2012 Dan Callaghan <dcallagh@redhat.com> - 0.14.6-1
 - upstream bugfix release 0.14.6
 
