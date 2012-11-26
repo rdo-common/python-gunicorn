@@ -9,13 +9,15 @@
 
 Name:           python-%{upstream_name}
 Version:        0.16.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
+# https://github.com/benoitc/gunicorn/issues/440
+Patch0:         %{upstream_name}-issue-440.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -47,6 +49,7 @@ Django, and Paster applications.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
+%patch0 -p1
 
 %if %{with python3}
 rm -rf %{py3dir}
@@ -101,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Mon Nov 26 2012 Dan Callaghan <dcallagh@redhat.com> - 0.16.1-2
+- fix test suite error with py.test on Python 3.3
+
 * Mon Nov 26 2012 Dan Callaghan <dcallagh@redhat.com> - 0.16.1-1
 - new upstream release 0.16.1 (with Python 3 support)
 
