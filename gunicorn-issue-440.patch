@@ -1,0 +1,12 @@
+diff -ur gunicorn-0.16.1.orig/setup.py gunicorn-0.16.1/setup.py
+--- gunicorn-0.16.1.orig/setup.py	2012-11-19 20:49:05.000000000 +1000
++++ gunicorn-0.16.1/setup.py	2012-11-26 16:43:21.992259334 +1000
+@@ -56,7 +56,7 @@
+ 
+     def run(self):
+         import sys,subprocess
+-        basecmd = [sys.executable, '-m', 'py.test']
++        basecmd = [sys.executable, '-m', 'pytest']
+         if self.cov:
+             basecmd += ['--cov', 'gunicorn']
+         errno = subprocess.call(basecmd + ['tests'])
