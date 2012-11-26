@@ -1,37 +1,88 @@
 
 %global upstream_name gunicorn
 
-Name:           python-gunicorn
-Version:        0.15.0
+%if 0%{?fedora} || 0%{?rhel} > 6
+%bcond_without python3
+%else
+%bcond_with python3
+%endif
+
+Name:           python-%{upstream_name}
+Version:        0.16.1
 Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
-Source0:        http://pypi.python.org/packages/source/g/gunicorn/gunicorn-%{version}.tar.gz
+Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
 BuildRequires:  python-setuptools
-BuildRequires:  python-nose
+BuildRequires:  pytest
+%if %{with python3}
+BuildRequires:  python3-devel
+BuildRequires:  python3-setuptools
+BuildRequires:  python3-pytest
+%endif
+
+Requires:       python-setuptools
 
 %description
 Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
 
+%if %{with python3}
+%package -n python3-%{upstream_name}
+Summary:        Python WSGI application server
+Requires:       python3-setuptools
+
+%description -n python3-%{upstream_name}
+Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
+pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
+Django, and Paster applications.
+%endif
+
 %prep
 %setup -q -n %{upstream_name}-%{version}
+
+%if %{with python3}
+rm -rf %{py3dir}
+cp -a . %{py3dir}
+%endif
 
 %build
 %{__python} setup.py build
 
+%if %{with python3}
+pushd %{py3dir}
+%{__python3} setup.py build
+popd
+%endif
+
 %install
+%if %{with python3}
+pushd %{py3dir}
+%{__python3} setup.py install --skip-build --root %{buildroot}
+# rename executables in /usr/bin so they don't collide
+for executable in %{upstream_name} %{upstream_name}_django %{upstream_name}_paster ; do
+    mv %{buildroot}%{_bindir}/$executable %{buildroot}%{_bindir}/python3-$executable
+done
+popd
+%endif
+
 %{__python} setup.py install -O1 --skip-build --root $RPM_BUILD_ROOT
 
 %check
 %{__python} setup.py test
+
+%if %{with python3}
+pushd %{py3dir}
+%{__python3} setup.py test
+popd
+%endif
 
 %files
 %doc LICENSE NOTICE README.rst THANKS
@@ -40,7 +91,19 @@ Django, and Paster applications.
 %{_bindir}/%{upstream_name}_django
 %{_bindir}/%{upstream_name}_paster
 
+%if %{with python3}
+%files -n python3-%{upstream_name}
+%doc LICENSE NOTICE README.rst THANKS
+%{python3_sitelib}/%{upstream_name}*
+%{_bindir}/python3-%{upstream_name}
+%{_bindir}/python3-%{upstream_name}_django
+%{_bindir}/python3-%{upstream_name}_paster
+%endif
+
 %changelog
+* Mon Nov 26 2012 Dan Callaghan <dcallagh@redhat.com> - 0.16.1-1
+- new upstream release 0.16.1 (with Python 3 support)
+
 * Mon Oct 22 2012 Dan Callaghan <dcallagh@redhat.com> - 0.15.0-1
 - new upstream release 0.15.0
 
