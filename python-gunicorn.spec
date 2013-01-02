@@ -8,16 +8,16 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        0.16.1
-Release:        2%{?dist}
+Version:        0.17.0
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
-# https://github.com/benoitc/gunicorn/issues/440
-Patch0:         %{upstream_name}-issue-440.patch
+# https://github.com/benoitc/gunicorn/pull/462
+Patch0:         %{name}-argumentparser-version.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -104,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Wed Jan 02 2013 Dan Callaghan <dcallagh@redhat.com> - 0.17.0-1
+- new upstream release 0.17.0
+
 * Mon Nov 26 2012 Dan Callaghan <dcallagh@redhat.com> - 0.16.1-2
 - fix test suite error with py.test on Python 3.3
 
