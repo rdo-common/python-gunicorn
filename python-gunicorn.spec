@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        0.17.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -18,6 +18,8 @@ URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
 # https://github.com/benoitc/gunicorn/pull/462
 Patch0:         %{name}-argumentparser-version.patch
+# distro-specific, not upstreamable
+Patch100:       %{name}-dev-log.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -50,6 +52,7 @@ Django, and Paster applications.
 %prep
 %setup -q -n %{upstream_name}-%{version}
 %patch0 -p1
+%patch100 -p1
 
 %if %{with python3}
 rm -rf %{py3dir}
@@ -104,6 +107,9 @@ popd
 %endif
 
 %changelog
+* Wed Jan 02 2013 Dan Callaghan <dcallagh@redhat.com> - 0.17.0-2
+- patch to use /dev/log for syslog by default
+
 * Wed Jan 02 2013 Dan Callaghan <dcallagh@redhat.com> - 0.17.0-1
 - new upstream release 0.17.0
 
