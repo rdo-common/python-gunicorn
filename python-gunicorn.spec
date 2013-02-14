@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        0.17.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -104,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.17.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Thu Jan 17 2013 Dan Callaghan <dcallagh@redhat.com> - 0.17.2-1
 - upstream bug fix release 0.17.2
 
