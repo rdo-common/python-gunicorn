@@ -8,7 +8,7 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        0.17.4
+Version:        17.5
 Release:        1%{?dist}
 Summary:        Python WSGI application server
 
@@ -104,6 +104,11 @@ popd
 %endif
 
 %changelog
+* Tue Jul 09 2013 Dan Callaghan <dcallagh@redhat.com> - 17.5-1
+- upstream release 17.5: 
+  http://docs.gunicorn.org/en/R17.5/2013-news.html#r17-5-2013-07-03 
+  (version numbering scheme has changed to drop the initial 0)
+
 * Tue Apr 30 2013 Dan Callaghan <dcallagh@redhat.com> - 0.17.4-1
 - upstream release 0.17.4: http://docs.gunicorn.org/en/0.17.4/news.html
 
