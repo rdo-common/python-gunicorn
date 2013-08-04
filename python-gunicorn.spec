@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        17.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -104,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 17.5-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Tue Jul 09 2013 Dan Callaghan <dcallagh@redhat.com> - 17.5-1
 - upstream release 17.5: 
   http://docs.gunicorn.org/en/R17.5/2013-news.html#r17-5-2013-07-03 
