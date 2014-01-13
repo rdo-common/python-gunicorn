@@ -1,7 +1,7 @@
 
 %global upstream_name gunicorn
 
-%if 0%{?fedora} || 0%{?rhel} > 6
+%if 0%{?fedora}
 %bcond_without python3
 %else
 %bcond_with python3
