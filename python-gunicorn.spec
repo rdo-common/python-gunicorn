@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        18.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -104,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Wed May 28 2014 Kalev Lember <kalevlember@gmail.com> - 18.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Changes/Python_3.4
+
 * Fri Sep 06 2013 Dan Callaghan <dcallagh@redhat.com> - 18.0-1
 - upstream release 18.0: http://docs.gunicorn.org/en/latest/news.html
 
