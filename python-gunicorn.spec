@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        18.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -104,6 +104,9 @@ popd
 %endif
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 18.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Wed May 28 2014 Kalev Lember <kalevlember@gmail.com> - 18.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Changes/Python_3.4
 
