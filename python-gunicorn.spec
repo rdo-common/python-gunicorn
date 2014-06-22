@@ -8,8 +8,8 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        18.0
-Release:        3%{?dist}
+Version:        19.0.0
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -55,6 +55,10 @@ Django, and Paster applications.
 rm -rf %{py3dir}
 cp -a . %{py3dir}
 %endif
+
+# need to remove gaiohttp worker from the Python 2 version, it is supported on 
+# Python 3 only and t fails byte compilation on 2.x due to using "yield from"
+rm gunicorn/workers/gaiohttp.py*
 
 %build
 %{__python} setup.py build
@@ -104,6 +108,9 @@ popd
 %endif
 
 %changelog
+* Mon Jun 23 2014 Dan Callaghan <dcallagh@redhat.com> - 19.0.0-1
+- upstream release 19.0: http://docs.gunicorn.org/en/19.0/news.html
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 18.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
