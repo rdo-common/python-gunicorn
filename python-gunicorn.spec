@@ -8,7 +8,7 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        19.0.0
+Version:        19.1.1
 Release:        1%{?dist}
 Summary:        Python WSGI application server
 
@@ -17,7 +17,10 @@ License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
 # distro-specific, not upstreamable
-Patch100:       %{name}-dev-log.patch
+Patch101:       0001-use-dev-log-for-syslog.patch
+# upstream version requirements are unnecessarily strict,
+# we replace == requirements with >=
+Patch102:       0002-relax-version-requirements.patch
 
 BuildArch:      noarch
 BuildRequires:  python2-devel
@@ -49,7 +52,8 @@ Django, and Paster applications.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
-%patch100 -p1
+%patch101 -p1
+%patch102 -p1
 
 %if %{with python3}
 rm -rf %{py3dir}
@@ -57,8 +61,8 @@ cp -a . %{py3dir}
 %endif
 
 # need to remove gaiohttp worker from the Python 2 version, it is supported on 
-# Python 3 only and t fails byte compilation on 2.x due to using "yield from"
-rm gunicorn/workers/gaiohttp.py*
+# Python 3 only and it fails byte compilation on 2.x due to using "yield from"
+rm gunicorn/workers/_gaiohttp.py*
 
 %build
 %{__python} setup.py build
@@ -108,6 +112,9 @@ popd
 %endif
 
 %changelog
+* Tue Aug 19 2014 Dan Callaghan <dcallagh@redhat.com> - 19.1.1-1
+- upstream release 19.1.1: http://docs.gunicorn.org/en/19.1.1/news.html
+
 * Mon Jun 23 2014 Dan Callaghan <dcallagh@redhat.com> - 19.0.0-1
 - upstream release 19.0: http://docs.gunicorn.org/en/19.0/news.html
 

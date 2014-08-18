@@ -1,0 +1,23 @@
+From 999cf947a0c67209a4ec06d202fa69d18c5a9858 Mon Sep 17 00:00:00 2001
+From: Dan Callaghan <dcallagh@redhat.com>
+Date: Tue, 19 Aug 2014 08:19:11 +1000
+Subject: [PATCH 2/2] relax version requirements
+
+---
+ requirements_dev.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/requirements_dev.txt b/requirements_dev.txt
+index 7aa98ae..1877ac4 100644
+--- a/requirements_dev.txt
++++ b/requirements_dev.txt
+@@ -1,4 +1,4 @@
+-pytest==2.6.0
+-pytest-cov==1.7.0
++pytest>=2.6.0
++pytest-cov>=1.7.0
+ sphinx
+ sphinx_rtd_theme
+-- 
+1.9.3
+
