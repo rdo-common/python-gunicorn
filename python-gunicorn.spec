@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.1.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -26,10 +26,14 @@ BuildArch:      noarch
 BuildRequires:  python2-devel
 BuildRequires:  python-setuptools
 BuildRequires:  pytest
+BuildRequires:  python-pytest-cov
+BuildRequires:  python-sphinx
+BuildRequires:  python-sphinx_rtd_theme
 %if %{with python3}
 BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
 BuildRequires:  python3-pytest
+BuildRequires:  python3-pytest-cov
 %endif
 
 Requires:       python-setuptools
@@ -50,14 +54,27 @@ pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI,
 Django, and Paster applications.
 %endif
 
+%package doc
+Summary:        Documentation for the %{name} package
+
+%description doc
+Documentation for the %{name} package.
+
 %prep
 %setup -q -n %{upstream_name}-%{version}
 %patch101 -p1
 %patch102 -p1
 
+# coverage is disabled until pytest-cov in Fedora is updated to 1.7
+sed -i -e '/pytest-cov/d' requirements_dev.txt
+
 %if %{with python3}
 rm -rf %{py3dir}
 cp -a . %{py3dir}
+pushd %{py3dir}
+# we build the docs with Python 2, not Python 3
+sed -i -e '/sphinx/d' requirements_dev.txt
+popd
 %endif
 
 # need to remove gaiohttp worker from the Python 2 version, it is supported on 
@@ -72,6 +89,8 @@ pushd %{py3dir}
 %{__python3} setup.py build
 popd
 %endif
+
+%{__python} setup.py build_sphinx
 
 %install
 %if %{with python3}
@@ -111,7 +130,13 @@ popd
 %{_bindir}/python3-%{upstream_name}_paster
 %endif
 
+%files doc
+%doc LICENSE build/sphinx/html/*
+
 %changelog
+* Tue Aug 19 2014 Dan Callaghan <dcallagh@redhat.com> - 19.1.1-2
+- fixed build requirements, added -doc subpackage with HTML docs
+
 * Tue Aug 19 2014 Dan Callaghan <dcallagh@redhat.com> - 19.1.1-1
 - upstream release 19.1.1: http://docs.gunicorn.org/en/19.1.1/news.html
 
