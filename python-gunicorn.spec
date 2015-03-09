@@ -26,6 +26,7 @@ BuildArch:      noarch
 BuildRequires:  python2-devel
 BuildRequires:  python-setuptools
 BuildRequires:  pytest
+BuildRequires:  python-mock
 BuildRequires:  python-pytest-cov
 BuildRequires:  python-sphinx
 BuildRequires:  python-sphinx_rtd_theme
