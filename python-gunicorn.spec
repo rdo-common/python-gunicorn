@@ -9,13 +9,15 @@
 
 Name:           python-%{upstream_name}
 Version:        19.3.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
+# https://github.com/benoitc/gunicorn/pull/1095
+Patch1:         0001-handle-HaltServer-in-manage_workers.patch
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict,
@@ -63,6 +65,7 @@ Documentation for the %{name} package.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
+%patch1 -p1
 %patch101 -p1
 %patch102 -p1
 
@@ -135,6 +138,9 @@ popd
 %doc LICENSE build/sphinx/html/*
 
 %changelog
+* Thu Nov 05 2015 Dan Callaghan <dcallagh@redhat.com> - 19.3.0-3
+- handle expected HaltServer exception in manage_workers (RHBZ#1200041)
+
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 19.3.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
