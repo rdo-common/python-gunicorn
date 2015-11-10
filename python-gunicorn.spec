@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.3.0
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -138,6 +138,9 @@ popd
 %doc LICENSE build/sphinx/html/*
 
 %changelog
+* Tue Nov 10 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 19.3.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Changes/python3.5
+
 * Thu Nov 05 2015 Dan Callaghan <dcallagh@redhat.com> - 19.3.0-3
 - handle expected HaltServer exception in manage_workers (RHBZ#1200041)
 
