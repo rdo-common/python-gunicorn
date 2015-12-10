@@ -12,7 +12,7 @@ index 3e2bb35..6e4ab61 100644
 --- a/requirements_test.txt
 +++ b/requirements_test.txt
 @@ -1,2 +1,2 @@
--pytest==2.6.3
+-pytest==2.8.3
 -pytest-cov==1.7.0
 +pytest
 +pytest-cov

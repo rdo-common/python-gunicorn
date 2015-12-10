@@ -8,8 +8,8 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        19.3.0
-Release:        4%{?dist}
+Version:        19.4.1
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -20,8 +20,7 @@ Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upst
 Patch1:         0001-handle-HaltServer-in-manage_workers.patch
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
-# upstream version requirements are unnecessarily strict,
-# we replace == requirements with >=
+# upstream version requirements are unnecessarily strict
 Patch102:       0002-relax-version-requirements.patch
 
 BuildArch:      noarch
@@ -68,9 +67,6 @@ Documentation for the %{name} package.
 %patch1 -p1
 %patch101 -p1
 %patch102 -p1
-
-# coverage is disabled until pytest-cov in Fedora is updated to 1.7
-sed -i -e '/pytest-cov/d' requirements_dev.txt
 
 %if %{with python3}
 rm -rf %{py3dir}
@@ -138,6 +134,9 @@ popd
 %doc LICENSE build/sphinx/html/*
 
 %changelog
+* Thu Dec 10 2015 Dan Callaghan <dcallagh@redhat.com> - 19.4.1-1
+- upstream release 19.4.1: http://docs.gunicorn.org/en/19.4.1/news.html
+
 * Tue Nov 10 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 19.3.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Changes/python3.5
 

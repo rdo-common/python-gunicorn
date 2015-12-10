@@ -1,4 +1,4 @@
-From c49c68468abca6b817817bcd774952bf5df0fc15 Mon Sep 17 00:00:00 2001
+From 227804747fe9be402e5721386112e1c9f18d9374 Mon Sep 17 00:00:00 2001
 From: Dan Callaghan <dcallagh@redhat.com>
 Date: Tue, 11 Aug 2015 17:08:03 +1000
 Subject: [PATCH] handle HaltServer in manage_workers
@@ -8,10 +8,10 @@ Subject: [PATCH] handle HaltServer in manage_workers
  1 file changed, 18 insertions(+), 18 deletions(-)
 
 diff --git a/gunicorn/arbiter.py b/gunicorn/arbiter.py
-index 7ec4a3f..5caeb6b 100644
+index 92e6dae..683bb20 100644
 --- a/gunicorn/arbiter.py
 +++ b/gunicorn/arbiter.py
-@@ -171,9 +171,9 @@ def run(self):
+@@ -176,9 +176,9 @@ def run(self):
          self.start()
          util._setproctitle("master [%s]" % self.proc_name)
  
@@ -24,7 +24,7 @@ index 7ec4a3f..5caeb6b 100644
                  sig = self.SIG_QUEUE.pop(0) if len(self.SIG_QUEUE) else None
                  if sig is None:
                      self.sleep()
-@@ -193,21 +193,21 @@ def run(self):
+@@ -198,21 +198,21 @@ def run(self):
                  self.log.info("Handling signal: %s", signame)
                  handler()
                  self.wakeup()
@@ -38,7 +38,7 @@ index 7ec4a3f..5caeb6b 100644
 -                raise
 -            except Exception:
 -                self.log.info("Unhandled exception in main loop:\n%s",
--                            traceback.format_exc())
+-                              traceback.format_exc())
 -                self.stop(False)
 -                if self.pidfile is not None:
 -                    self.pidfile.unlink()
@@ -53,7 +53,7 @@ index 7ec4a3f..5caeb6b 100644
 +            raise
 +        except Exception:
 +            self.log.info("Unhandled exception in main loop:\n%s",
-+                        traceback.format_exc())
++                          traceback.format_exc())
 +            self.stop(False)
 +            if self.pidfile is not None:
 +                self.pidfile.unlink()
