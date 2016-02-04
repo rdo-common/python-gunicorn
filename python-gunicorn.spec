@@ -9,7 +9,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.4.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
@@ -134,6 +134,9 @@ popd
 %doc LICENSE build/sphinx/html/*
 
 %changelog
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 19.4.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Thu Dec 10 2015 Dan Callaghan <dcallagh@redhat.com> - 19.4.1-1
 - upstream release 19.4.1: http://docs.gunicorn.org/en/19.4.1/news.html
 
