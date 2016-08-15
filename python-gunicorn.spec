@@ -8,16 +8,14 @@
 %endif
 
 Name:           python-%{upstream_name}
-Version:        19.4.1
-Release:        3%{?dist}
+Version:        19.6.0
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 
 Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
-Source0:        http://pypi.python.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
-# https://github.com/benoitc/gunicorn/pull/1095
-Patch1:         0001-handle-HaltServer-in-manage_workers.patch
+Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict
@@ -64,7 +62,6 @@ Documentation for the %{name} package.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
-%patch1 -p1
 %patch101 -p1
 %patch102 -p1
 
@@ -134,6 +131,9 @@ popd
 %doc LICENSE build/sphinx/html/*
 
 %changelog
+* Mon Aug 15 2016 Dan Callaghan <dcallagh@redhat.com> - 19.6.0-1
+- upstream release 19.6.0: http://docs.gunicorn.org/en/19.6.0/news.html
+
 * Tue Jul 19 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 19.4.1-3
 - https://fedoraproject.org/wiki/Changes/Automatic_Provides_for_Python_RPM_Packages
 
