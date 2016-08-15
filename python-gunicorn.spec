@@ -1,18 +1,10 @@
 
 %global upstream_name gunicorn
 
-%if 0%{?fedora}
-%bcond_without python3
-%else
-%bcond_with python3
-%endif
-
 Name:           python-%{upstream_name}
 Version:        19.6.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
-
-Group:          System Environment/Daemons
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
@@ -20,39 +12,43 @@ Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict
 Patch102:       0002-relax-version-requirements.patch
-
 BuildArch:      noarch
-BuildRequires:  python2-devel
-BuildRequires:  python-setuptools
-BuildRequires:  pytest
-BuildRequires:  python-mock
-BuildRequires:  python-pytest-cov
-BuildRequires:  python-sphinx
-BuildRequires:  python-sphinx_rtd_theme
-%if %{with python3}
-BuildRequires:  python3-devel
-BuildRequires:  python3-setuptools
-BuildRequires:  python3-pytest
-BuildRequires:  python3-pytest-cov
-%endif
-
-Requires:       python-setuptools
 
 %description
 Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
 
-%if %{with python3}
+%package -n python2-%{upstream_name}
+Summary:        %{summary}
+%{?python_provide:%python_provide python2-%{upstream_name}}
+BuildRequires:  python2-devel
+BuildRequires:  python2-setuptools
+BuildRequires:  python2-pytest
+BuildRequires:  python2-mock
+BuildRequires:  python2-pytest-cov
+BuildRequires:  python2-sphinx
+BuildRequires:  python2-sphinx_rtd_theme
+Requires:       python2-setuptools
+
+%description -n python2-%{upstream_name}
+Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
+pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
+Django, and Paster applications.
+
 %package -n python3-%{upstream_name}
-Summary:        Python WSGI application server
+Summary:        %{summary}
+%{?python_provide:%python_provide python3-%{upstream_name}}
+BuildRequires:  python3-devel
+BuildRequires:  python3-setuptools
+BuildRequires:  python3-pytest
+BuildRequires:  python3-pytest-cov
 Requires:       python3-setuptools
 
 %description -n python3-%{upstream_name}
 Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
-%endif
 
 %package doc
 Summary:        Documentation for the %{name} package
@@ -65,72 +61,50 @@ Documentation for the %{name} package.
 %patch101 -p1
 %patch102 -p1
 
-%if %{with python3}
-rm -rf %{py3dir}
-cp -a . %{py3dir}
-pushd %{py3dir}
-# we build the docs with Python 2, not Python 3
-sed -i -e '/sphinx/d' requirements_dev.txt
-popd
-%endif
-
-# need to remove gaiohttp worker from the Python 2 version, it is supported on 
-# Python 3 only and it fails byte compilation on 2.x due to using "yield from"
-rm gunicorn/workers/_gaiohttp.py*
-
 %build
-%{__python} setup.py build
-
-%if %{with python3}
-pushd %{py3dir}
-%{__python3} setup.py build
-popd
-%endif
-
-%{__python} setup.py build_sphinx
+%py2_build
+%py3_build
+%{__python2} setup.py build_sphinx
 
 %install
-%if %{with python3}
-pushd %{py3dir}
-%{__python3} setup.py install --skip-build --root %{buildroot}
+%py3_install
 # rename executables in /usr/bin so they don't collide
 for executable in %{upstream_name} %{upstream_name}_django %{upstream_name}_paster ; do
     mv %{buildroot}%{_bindir}/$executable %{buildroot}%{_bindir}/python3-$executable
 done
-popd
-%endif
-
-%{__python} setup.py install -O1 --skip-build --root $RPM_BUILD_ROOT
+%py2_install
+# need to remove gaiohttp worker from the Python 2 version, it is supported on 
+# Python 3 only and it fails byte compilation on 2.x due to using "yield from"
+rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 
 %check
-%{__python} setup.py test
-
-%if %{with python3}
-pushd %{py3dir}
+%{__python2} setup.py test
 %{__python3} setup.py test
-popd
-%endif
 
-%files
-%doc LICENSE NOTICE README.rst THANKS
-%{python_sitelib}/%{upstream_name}*
+%files -n python2-%{upstream_name}
+%license LICENSE
+%doc NOTICE README.rst THANKS
+%{python2_sitelib}/%{upstream_name}*
 %{_bindir}/%{upstream_name}
 %{_bindir}/%{upstream_name}_django
 %{_bindir}/%{upstream_name}_paster
 
-%if %{with python3}
 %files -n python3-%{upstream_name}
-%doc LICENSE NOTICE README.rst THANKS
+%license LICENSE
+%doc NOTICE README.rst THANKS
 %{python3_sitelib}/%{upstream_name}*
 %{_bindir}/python3-%{upstream_name}
 %{_bindir}/python3-%{upstream_name}_django
 %{_bindir}/python3-%{upstream_name}_paster
-%endif
 
 %files doc
-%doc LICENSE build/sphinx/html/*
+%license LICENSE
+%doc build/sphinx/html/*
 
 %changelog
+* Mon Aug 15 2016 Dan Callaghan <dcallagh@redhat.com> - 19.6.0-2
+- updated to latest Python guidelines
+
 * Mon Aug 15 2016 Dan Callaghan <dcallagh@redhat.com> - 19.6.0-1
 - upstream release 19.6.0: http://docs.gunicorn.org/en/19.6.0/news.html
 
