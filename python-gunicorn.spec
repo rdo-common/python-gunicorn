@@ -3,7 +3,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.6.0
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
@@ -102,6 +102,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc build/sphinx/html/*
 
 %changelog
+* Mon Dec 19 2016 Miro Hrončok <mhroncok@redhat.com> - 19.6.0-3
+- Rebuild for Python 3.6
+
 * Mon Aug 15 2016 Dan Callaghan <dcallagh@redhat.com> - 19.6.0-2
 - updated to latest Python guidelines
 
