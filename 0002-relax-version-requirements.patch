@@ -1,4 +1,4 @@
-From b5d70ff242df617ab8078b69086e59428fd4a53a Mon Sep 17 00:00:00 2001
+From dc55e3e0b02bb5e6e73a0f6af915e50745585138 Mon Sep 17 00:00:00 2001
 From: Dan Callaghan <dcallagh@redhat.com>
 Date: Tue, 19 Aug 2014 08:19:11 +1000
 Subject: [PATCH 2/2] relax version requirements
@@ -8,14 +8,14 @@ Subject: [PATCH 2/2] relax version requirements
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/requirements_test.txt b/requirements_test.txt
-index 3e2bb35..6e4ab61 100644
+index ba9f66e..48a476b 100644
 --- a/requirements_test.txt
 +++ b/requirements_test.txt
 @@ -1,2 +1,2 @@
--pytest==2.8.3
--pytest-cov==1.7.0
-+pytest
-+pytest-cov
+-pytest==3.0.5
+-pytest-cov==2.4.0
++pytest>=3.0.5
++pytest-cov>=2.4.0
 -- 
-1.9.3
+2.9.3
 

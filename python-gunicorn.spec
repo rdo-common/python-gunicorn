@@ -2,12 +2,15 @@
 %global upstream_name gunicorn
 
 Name:           python-%{upstream_name}
-Version:        19.6.0
-Release:        4%{?dist}
+Version:        19.7.1
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
+# We already have aiohttp 2.x in F27+ so we need this fix now, to get the tests passing
+# https://github.com/benoitc/gunicorn/pull/1418
+Patch1:         deprecate-gaiohttp-worker.patch
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict
@@ -58,6 +61,7 @@ Documentation for the %{name} package.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
+%patch1 -p1
 %patch101 -p1
 %patch102 -p1
 
@@ -69,7 +73,7 @@ Documentation for the %{name} package.
 %install
 %py3_install
 # rename executables in /usr/bin so they don't collide
-for executable in %{upstream_name} %{upstream_name}_django %{upstream_name}_paster ; do
+for executable in %{upstream_name} %{upstream_name}_paster ; do
     mv %{buildroot}%{_bindir}/$executable %{buildroot}%{_bindir}/python3-$executable
 done
 %py2_install
@@ -86,7 +90,6 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc NOTICE README.rst THANKS
 %{python2_sitelib}/%{upstream_name}*
 %{_bindir}/%{upstream_name}
-%{_bindir}/%{upstream_name}_django
 %{_bindir}/%{upstream_name}_paster
 
 %files -n python3-%{upstream_name}
@@ -94,7 +97,6 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc NOTICE README.rst THANKS
 %{python3_sitelib}/%{upstream_name}*
 %{_bindir}/python3-%{upstream_name}
-%{_bindir}/python3-%{upstream_name}_django
 %{_bindir}/python3-%{upstream_name}_paster
 
 %files doc
@@ -102,6 +104,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc build/sphinx/html/*
 
 %changelog
+* Wed Mar 29 2017 Dan Callaghan <dcallagh@redhat.com> - 19.7.1-1
+- upstream release 19.7.1: http://docs.gunicorn.org/en/19.7.1/news.html
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 19.6.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
