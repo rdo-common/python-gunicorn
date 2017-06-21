@@ -1,4 +1,6 @@
-
+%if 0%{?fedora}
+%global with_python3 1
+%endif
 %global upstream_name gunicorn
 
 Name:           python-%{upstream_name}
@@ -39,6 +41,7 @@ Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
 
+%if 0%{?with_python3}
 %package -n python3-%{upstream_name}
 Summary:        %{summary}
 %{?python_provide:%python_provide python3-%{upstream_name}}
@@ -52,6 +55,7 @@ Requires:       python3-setuptools
 Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
+%endif
 
 %package doc
 Summary:        Documentation for the %{name} package
@@ -67,15 +71,19 @@ Documentation for the %{name} package.
 
 %build
 %py2_build
+%if 0%{?with_python3}
 %py3_build
+%endif
 %{__python2} setup.py build_sphinx
 
 %install
+%if 0%{?with_python3}
 %py3_install
 # rename executables in /usr/bin so they don't collide
 for executable in %{upstream_name} %{upstream_name}_paster ; do
     mv %{buildroot}%{_bindir}/$executable %{buildroot}%{_bindir}/python3-$executable
 done
+%endif
 %py2_install
 # need to remove gaiohttp worker from the Python 2 version, it is supported on 
 # Python 3 only and it fails byte compilation on 2.x due to using "yield from"
@@ -83,7 +91,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 
 %check
 %{__python2} setup.py test
+%if 0%{?with_python3}
 %{__python3} setup.py test
+%endif
 
 %files -n python2-%{upstream_name}
 %license LICENSE
@@ -92,12 +102,14 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %{_bindir}/%{upstream_name}
 %{_bindir}/%{upstream_name}_paster
 
+%if 0%{?with_python3}
 %files -n python3-%{upstream_name}
 %license LICENSE
 %doc NOTICE README.rst THANKS
 %{python3_sitelib}/%{upstream_name}*
 %{_bindir}/python3-%{upstream_name}
 %{_bindir}/python3-%{upstream_name}_paster
+%endif
 
 %files doc
 %license LICENSE
