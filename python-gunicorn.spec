@@ -3,7 +3,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.7.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
@@ -104,6 +104,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc build/sphinx/html/*
 
 %changelog
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 19.7.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Wed Mar 29 2017 Dan Callaghan <dcallagh@redhat.com> - 19.7.1-1
 - upstream release 19.7.1: http://docs.gunicorn.org/en/19.7.1/news.html
 
