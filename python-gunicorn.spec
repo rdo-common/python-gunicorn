@@ -3,7 +3,7 @@
 
 Name:           python-%{upstream_name}
 Version:        19.7.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
@@ -73,10 +73,24 @@ Documentation for the %{name} package.
 %install
 %py3_install
 # rename executables in /usr/bin so they don't collide
-for executable in %{upstream_name} %{upstream_name}_paster ; do
-    mv %{buildroot}%{_bindir}/$executable %{buildroot}%{_bindir}/python3-$executable
-done
+mv %{buildroot}%{_bindir}/gunicorn{,-3}
+mv %{buildroot}%{_bindir}/gunicorn_paster{,-3}
+# symlink extra executable names
+ln -s %{_bindir}/gunicorn-3 %{buildroot}%{_bindir}/gunicorn-%{python3_version}
+ln -s %{_bindir}/gunicorn_paster-3 %{buildroot}%{_bindir}/gunicorn_paster-%{python3_version}
+%if ! (0%{?fedora} >= 29)
+ln -s %{_bindir}/gunicorn-3 %{buildroot}%{_bindir}/python3-gunicorn
+ln -s %{_bindir}/gunicorn_paster-3 %{buildroot}%{_bindir}/python3-gunicorn_paster
+%endif
 %py2_install
+# rename executables in /usr/bin so they don't collide
+mv %{buildroot}%{_bindir}/gunicorn{,-2}
+mv %{buildroot}%{_bindir}/gunicorn_paster{,-2}
+# symlink extra executable names
+ln -s %{_bindir}/gunicorn-2 %{buildroot}%{_bindir}/gunicorn
+ln -s %{_bindir}/gunicorn_paster-2 %{buildroot}%{_bindir}/gunicorn_paster
+ln -s %{_bindir}/gunicorn-2 %{buildroot}%{_bindir}/gunicorn-2.7
+ln -s %{_bindir}/gunicorn_paster-2 %{buildroot}%{_bindir}/gunicorn_paster-2.7
 # need to remove gaiohttp worker from the Python 2 version, it is supported on 
 # Python 3 only and it fails byte compilation on 2.x due to using "yield from"
 rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
@@ -91,19 +105,33 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %{python2_sitelib}/%{upstream_name}*
 %{_bindir}/%{upstream_name}
 %{_bindir}/%{upstream_name}_paster
+%{_bindir}/%{upstream_name}-2
+%{_bindir}/%{upstream_name}_paster-2
+%{_bindir}/%{upstream_name}-2.7
+%{_bindir}/%{upstream_name}_paster-2.7
 
 %files -n python3-%{upstream_name}
 %license LICENSE
 %doc NOTICE README.rst THANKS
 %{python3_sitelib}/%{upstream_name}*
+%{_bindir}/%{upstream_name}-3
+%{_bindir}/%{upstream_name}_paster-3
+%{_bindir}/%{upstream_name}-%{python3_version}
+%{_bindir}/%{upstream_name}_paster-%{python3_version}
+%if ! (0%{?fedora} >= 29)
 %{_bindir}/python3-%{upstream_name}
 %{_bindir}/python3-%{upstream_name}_paster
+%endif
 
 %files doc
 %license LICENSE
 %doc build/sphinx/html/*
 
 %changelog
+* Mon Apr 16 2018 Dan Callaghan <dcallagh@redhat.com> - 19.7.1-4
+- adjusted executable names to match Python packaging guidelines:
+  gunicorn-2, gunicorn-2.7, gunicorn-3, gunicorn-3.6 (RHBZ#1567198)
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 19.7.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
