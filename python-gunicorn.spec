@@ -2,15 +2,12 @@
 %global upstream_name gunicorn
 
 Name:           python-%{upstream_name}
-Version:        19.7.1
-Release:        4%{?dist}
+Version:        19.8.1
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
-# We already have aiohttp 2.x in F27+ so we need this fix now, to get the tests passing
-# https://github.com/benoitc/gunicorn/pull/1418
-Patch1:         deprecate-gaiohttp-worker.patch
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict
@@ -61,7 +58,6 @@ Documentation for the %{name} package.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
-%patch1 -p1
 %patch101 -p1
 %patch102 -p1
 
@@ -128,6 +124,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc build/sphinx/html/*
 
 %changelog
+* Tue May 29 2018 Dan Callaghan <dcallagh@redhat.com> - 19.8.1-1
+- upstream release 19.8.1: http://docs.gunicorn.org/en/19.8.1/news.html
+
 * Mon Apr 16 2018 Dan Callaghan <dcallagh@redhat.com> - 19.7.1-4
 - adjusted executable names to match Python packaging guidelines:
   gunicorn-2, gunicorn-2.7, gunicorn-3, gunicorn-3.6 (RHBZ#1567198)
