@@ -1,0 +1,371 @@
+diff --git a/gunicorn/workers/__init__.py b/gunicorn/workers/__init__.py
+index 05a3e28..074e001 100644
+--- a/gunicorn/workers/__init__.py
++++ b/gunicorn/workers/__init__.py
+@@ -17,6 +17,6 @@
+ }
+ 
+ 
+-if sys.version_info >= (3, 3):
+-    # gaiohttp worker can be used with Python 3.3+ only.
++if sys.version_info >= (3, 4):
++    # gaiohttp worker can be used with Python 3.4+ only.
+     SUPPORTED_WORKERS["gaiohttp"] = "gunicorn.workers.gaiohttp.AiohttpWorker"
+diff --git a/gunicorn/workers/_gaiohttp.py b/gunicorn/workers/_gaiohttp.py
+index cdce4be..fe378c3 100644
+--- a/gunicorn/workers/_gaiohttp.py
++++ b/gunicorn/workers/_gaiohttp.py
+@@ -46,7 +46,7 @@ def init_process(self):
+         super().init_process()
+ 
+     def run(self):
+-        self._runner = asyncio.async(self._run(), loop=self.loop)
++        self._runner = asyncio.ensure_future(self._run(), loop=self.loop)
+ 
+         try:
+             self.loop.run_until_complete(self._runner)
+diff --git a/gunicorn/workers/async.py b/gunicorn/workers/async.py
+deleted file mode 100644
+index a3a0f91..0000000
+--- a/gunicorn/workers/async.py
++++ /dev/null
+@@ -1,147 +0,0 @@
+-# -*- coding: utf-8 -
+-#
+-# This file is part of gunicorn released under the MIT license.
+-# See the NOTICE for more information.
+-
+-from datetime import datetime
+-import errno
+-import socket
+-import ssl
+-import sys
+-
+-import gunicorn.http as http
+-import gunicorn.http.wsgi as wsgi
+-import gunicorn.util as util
+-import gunicorn.workers.base as base
+-from gunicorn import six
+-
+-ALREADY_HANDLED = object()
+-
+-
+-class AsyncWorker(base.Worker):
+-
+-    def __init__(self, *args, **kwargs):
+-        super(AsyncWorker, self).__init__(*args, **kwargs)
+-        self.worker_connections = self.cfg.worker_connections
+-
+-    def timeout_ctx(self):
+-        raise NotImplementedError()
+-
+-    def is_already_handled(self, respiter):
+-        # some workers will need to overload this function to raise a StopIteration
+-        return respiter == ALREADY_HANDLED
+-
+-    def handle(self, listener, client, addr):
+-        req = None
+-        try:
+-            parser = http.RequestParser(self.cfg, client)
+-            try:
+-                listener_name = listener.getsockname()
+-                if not self.cfg.keepalive:
+-                    req = six.next(parser)
+-                    self.handle_request(listener_name, req, client, addr)
+-                else:
+-                    # keepalive loop
+-                    proxy_protocol_info = {}
+-                    while True:
+-                        req = None
+-                        with self.timeout_ctx():
+-                            req = six.next(parser)
+-                        if not req:
+-                            break
+-                        if req.proxy_protocol_info:
+-                            proxy_protocol_info = req.proxy_protocol_info
+-                        else:
+-                            req.proxy_protocol_info = proxy_protocol_info
+-                        self.handle_request(listener_name, req, client, addr)
+-            except http.errors.NoMoreData as e:
+-                self.log.debug("Ignored premature client disconnection. %s", e)
+-            except StopIteration as e:
+-                self.log.debug("Closing connection. %s", e)
+-            except ssl.SSLError:
+-                # pass to next try-except level
+-                six.reraise(*sys.exc_info())
+-            except EnvironmentError:
+-                # pass to next try-except level
+-                six.reraise(*sys.exc_info())
+-            except Exception as e:
+-                self.handle_error(req, client, addr, e)
+-        except ssl.SSLError as e:
+-            if e.args[0] == ssl.SSL_ERROR_EOF:
+-                self.log.debug("ssl connection closed")
+-                client.close()
+-            else:
+-                self.log.debug("Error processing SSL request.")
+-                self.handle_error(req, client, addr, e)
+-        except EnvironmentError as e:
+-            if e.errno not in (errno.EPIPE, errno.ECONNRESET):
+-                self.log.exception("Socket error processing request.")
+-            else:
+-                if e.errno == errno.ECONNRESET:
+-                    self.log.debug("Ignoring connection reset")
+-                else:
+-                    self.log.debug("Ignoring EPIPE")
+-        except Exception as e:
+-            self.handle_error(req, client, addr, e)
+-        finally:
+-            util.close(client)
+-
+-    def handle_request(self, listener_name, req, sock, addr):
+-        request_start = datetime.now()
+-        environ = {}
+-        resp = None
+-        try:
+-            self.cfg.pre_request(self, req)
+-            resp, environ = wsgi.create(req, sock, addr,
+-                    listener_name, self.cfg)
+-            environ["wsgi.multithread"] = True
+-            self.nr += 1
+-            if self.alive and self.nr >= self.max_requests:
+-                self.log.info("Autorestarting worker after current request.")
+-                resp.force_close()
+-                self.alive = False
+-
+-            if not self.cfg.keepalive:
+-                resp.force_close()
+-
+-            respiter = self.wsgi(environ, resp.start_response)
+-            if self.is_already_handled(respiter):
+-                return False
+-            try:
+-                if isinstance(respiter, environ['wsgi.file_wrapper']):
+-                    resp.write_file(respiter)
+-                else:
+-                    for item in respiter:
+-                        resp.write(item)
+-                resp.close()
+-                request_time = datetime.now() - request_start
+-                self.log.access(resp, req, environ, request_time)
+-            finally:
+-                if hasattr(respiter, "close"):
+-                    respiter.close()
+-            if resp.should_close():
+-                raise StopIteration()
+-        except StopIteration:
+-            raise
+-        except EnvironmentError:
+-            # If the original exception was a socket.error we delegate
+-            # handling it to the caller (where handle() might ignore it)
+-            six.reraise(*sys.exc_info())
+-        except Exception:
+-            if resp and resp.headers_sent:
+-                # If the requests have already been sent, we should close the
+-                # connection to indicate the error.
+-                self.log.exception("Error handling request")
+-                try:
+-                    sock.shutdown(socket.SHUT_RDWR)
+-                    sock.close()
+-                except EnvironmentError:
+-                    pass
+-                raise StopIteration()
+-            raise
+-        finally:
+-            try:
+-                self.cfg.post_request(self, req, environ, resp)
+-            except Exception:
+-                self.log.exception("Exception in post_request hook")
+-        return True
+diff --git a/gunicorn/workers/base_async.py b/gunicorn/workers/base_async.py
+new file mode 100644
+index 0000000..a3a0f91
+--- /dev/null
++++ b/gunicorn/workers/base_async.py
+@@ -0,0 +1,147 @@
++# -*- coding: utf-8 -
++#
++# This file is part of gunicorn released under the MIT license.
++# See the NOTICE for more information.
++
++from datetime import datetime
++import errno
++import socket
++import ssl
++import sys
++
++import gunicorn.http as http
++import gunicorn.http.wsgi as wsgi
++import gunicorn.util as util
++import gunicorn.workers.base as base
++from gunicorn import six
++
++ALREADY_HANDLED = object()
++
++
++class AsyncWorker(base.Worker):
++
++    def __init__(self, *args, **kwargs):
++        super(AsyncWorker, self).__init__(*args, **kwargs)
++        self.worker_connections = self.cfg.worker_connections
++
++    def timeout_ctx(self):
++        raise NotImplementedError()
++
++    def is_already_handled(self, respiter):
++        # some workers will need to overload this function to raise a StopIteration
++        return respiter == ALREADY_HANDLED
++
++    def handle(self, listener, client, addr):
++        req = None
++        try:
++            parser = http.RequestParser(self.cfg, client)
++            try:
++                listener_name = listener.getsockname()
++                if not self.cfg.keepalive:
++                    req = six.next(parser)
++                    self.handle_request(listener_name, req, client, addr)
++                else:
++                    # keepalive loop
++                    proxy_protocol_info = {}
++                    while True:
++                        req = None
++                        with self.timeout_ctx():
++                            req = six.next(parser)
++                        if not req:
++                            break
++                        if req.proxy_protocol_info:
++                            proxy_protocol_info = req.proxy_protocol_info
++                        else:
++                            req.proxy_protocol_info = proxy_protocol_info
++                        self.handle_request(listener_name, req, client, addr)
++            except http.errors.NoMoreData as e:
++                self.log.debug("Ignored premature client disconnection. %s", e)
++            except StopIteration as e:
++                self.log.debug("Closing connection. %s", e)
++            except ssl.SSLError:
++                # pass to next try-except level
++                six.reraise(*sys.exc_info())
++            except EnvironmentError:
++                # pass to next try-except level
++                six.reraise(*sys.exc_info())
++            except Exception as e:
++                self.handle_error(req, client, addr, e)
++        except ssl.SSLError as e:
++            if e.args[0] == ssl.SSL_ERROR_EOF:
++                self.log.debug("ssl connection closed")
++                client.close()
++            else:
++                self.log.debug("Error processing SSL request.")
++                self.handle_error(req, client, addr, e)
++        except EnvironmentError as e:
++            if e.errno not in (errno.EPIPE, errno.ECONNRESET):
++                self.log.exception("Socket error processing request.")
++            else:
++                if e.errno == errno.ECONNRESET:
++                    self.log.debug("Ignoring connection reset")
++                else:
++                    self.log.debug("Ignoring EPIPE")
++        except Exception as e:
++            self.handle_error(req, client, addr, e)
++        finally:
++            util.close(client)
++
++    def handle_request(self, listener_name, req, sock, addr):
++        request_start = datetime.now()
++        environ = {}
++        resp = None
++        try:
++            self.cfg.pre_request(self, req)
++            resp, environ = wsgi.create(req, sock, addr,
++                    listener_name, self.cfg)
++            environ["wsgi.multithread"] = True
++            self.nr += 1
++            if self.alive and self.nr >= self.max_requests:
++                self.log.info("Autorestarting worker after current request.")
++                resp.force_close()
++                self.alive = False
++
++            if not self.cfg.keepalive:
++                resp.force_close()
++
++            respiter = self.wsgi(environ, resp.start_response)
++            if self.is_already_handled(respiter):
++                return False
++            try:
++                if isinstance(respiter, environ['wsgi.file_wrapper']):
++                    resp.write_file(respiter)
++                else:
++                    for item in respiter:
++                        resp.write(item)
++                resp.close()
++                request_time = datetime.now() - request_start
++                self.log.access(resp, req, environ, request_time)
++            finally:
++                if hasattr(respiter, "close"):
++                    respiter.close()
++            if resp.should_close():
++                raise StopIteration()
++        except StopIteration:
++            raise
++        except EnvironmentError:
++            # If the original exception was a socket.error we delegate
++            # handling it to the caller (where handle() might ignore it)
++            six.reraise(*sys.exc_info())
++        except Exception:
++            if resp and resp.headers_sent:
++                # If the requests have already been sent, we should close the
++                # connection to indicate the error.
++                self.log.exception("Error handling request")
++                try:
++                    sock.shutdown(socket.SHUT_RDWR)
++                    sock.close()
++                except EnvironmentError:
++                    pass
++                raise StopIteration()
++            raise
++        finally:
++            try:
++                self.cfg.post_request(self, req, environ, resp)
++            except Exception:
++                self.log.exception("Exception in post_request hook")
++        return True
+diff --git a/gunicorn/workers/geventlet.py b/gunicorn/workers/geventlet.py
+index f0bb064..189062c 100644
+--- a/gunicorn/workers/geventlet.py
++++ b/gunicorn/workers/geventlet.py
+@@ -24,7 +24,7 @@
+ import greenlet
+ 
+ from gunicorn.http.wsgi import sendfile as o_sendfile
+-from gunicorn.workers.async import AsyncWorker
++from gunicorn.workers.base_async import AsyncWorker
+ 
+ def _eventlet_sendfile(fdout, fdin, offset, nbytes):
+     while True:
+diff --git a/gunicorn/workers/ggevent.py b/gunicorn/workers/ggevent.py
+index 34ee72a..fb9d919 100644
+--- a/gunicorn/workers/ggevent.py
++++ b/gunicorn/workers/ggevent.py
+@@ -27,7 +27,7 @@
+ 
+ import gunicorn
+ from gunicorn.http.wsgi import base_environ
+-from gunicorn.workers.async import AsyncWorker
++from gunicorn.workers.base_async import AsyncWorker
+ from gunicorn.http.wsgi import sendfile as o_sendfile
+ 
+ VERSION = "gevent/%s gunicorn/%s" % (gevent.__version__, gunicorn.__version__)
+diff --git a/tests/test_gaiohttp.py b/tests/test_gaiohttp.py
+index 6a08c41..e58f36c 100644
+--- a/tests/test_gaiohttp.py
++++ b/tests/test_gaiohttp.py
+@@ -50,7 +50,7 @@ def test_run(self, m_asyncio):
+         self.worker.loop = mock.Mock()
+         self.worker.run()
+ 
+-        self.assertTrue(m_asyncio.async.called)
++        self.assertTrue(m_asyncio.ensure_future.called)
+         self.assertTrue(self.worker.loop.run_until_complete.called)
+         self.assertTrue(self.worker.loop.close.called)
+ 
