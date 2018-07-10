@@ -2,16 +2,12 @@
 %global upstream_name gunicorn
 
 Name:           python-%{upstream_name}
-Version:        19.8.1
-Release:        3%{?dist}
+Version:        19.9.0
+Release:        1%{?dist}
 Summary:        Python WSGI application server
 License:        MIT
 URL:            http://gunicorn.org/
 Source0:        https://files.pythonhosted.org/packages/source/g/%{upstream_name}/%{upstream_name}-%{version}.tar.gz
-# https://github.com/benoitc/gunicorn/pull/1796
-# git diff --no-renames bd833e0009b8b07d13117f71534eb28e8dc24c5d~..bd833e0009b8b07d13117f71534eb28e8dc24c5d -- gunicorn/ tests/ >../fedora/python-gunicorn/rename-gunicorn.workers.async.patch
-# needed for Python 3.7, should be in the next gunicorn release
-Patch1:         rename-gunicorn.workers.async.patch
 # distro-specific, not upstreamable
 Patch101:       0001-use-dev-log-for-syslog.patch
 # upstream version requirements are unnecessarily strict
@@ -62,7 +58,6 @@ Documentation for the %{name} package.
 
 %prep
 %setup -q -n %{upstream_name}-%{version}
-%patch1 -p1
 %patch101 -p1
 %patch102 -p1
 
@@ -129,6 +124,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %doc build/sphinx/html/*
 
 %changelog
+* Tue Jul 10 2018 Dan Callaghan <dcallagh@redhat.com> - 19.9.0-1
+- upstream release 19.9.0: http://docs.gunicorn.org/en/19.9.0/news.html
+
 * Fri Jun 29 2018 Dan Callaghan <dcallagh@redhat.com> - 19.8.1-3
 - Fix for Python 3.7 (async is a reserved word now)
 
