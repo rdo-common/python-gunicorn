@@ -27,8 +27,6 @@ BuildRequires:  python2-setuptools
 BuildRequires:  python2-pytest
 BuildRequires:  python2-mock
 BuildRequires:  python2-pytest-cov
-BuildRequires:  python2-sphinx
-BuildRequires:  python2-sphinx_rtd_theme
 Requires:       python2-setuptools
 
 %description -n python2-%{upstream_name}
@@ -43,6 +41,8 @@ BuildRequires:  python3-devel
 BuildRequires:  python3-setuptools
 BuildRequires:  python3-pytest
 BuildRequires:  python3-pytest-cov
+BuildRequires:  python3-sphinx
+BuildRequires:  python3-sphinx_rtd_theme
 Requires:       python3-setuptools
 
 %description -n python3-%{upstream_name}
@@ -64,7 +64,7 @@ Documentation for the %{name} package.
 %build
 %py2_build
 %py3_build
-%{__python2} setup.py build_sphinx
+%{__python3} setup.py build_sphinx
 
 %install
 %py3_install
