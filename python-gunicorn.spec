@@ -1,3 +1,6 @@
+%if 0%{?fedora} || 0%{?rhel} > 7
+%global with_python3 1
+%endif
 
 %global upstream_name gunicorn
 
@@ -34,6 +37,7 @@ Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
 
+%if 0%{?with_python3}
 %package -n python3-%{upstream_name}
 Summary:        %{summary}
 %{?python_provide:%python_provide python3-%{upstream_name}}
@@ -49,6 +53,7 @@ Requires:       python3-setuptools
 Gunicorn ("Green Unicorn") is a Python WSGI HTTP server for UNIX. It uses the 
 pre-fork worker model, ported from Ruby's Unicorn project. It supports WSGI, 
 Django, and Paster applications.
+%endif
 
 %package doc
 Summary:        Documentation for the %{name} package
@@ -63,10 +68,13 @@ Documentation for the %{name} package.
 
 %build
 %py2_build
+%if 0%{?with_python3}
 %py3_build
 %{__python3} setup.py build_sphinx
+%endif
 
 %install
+%if 0%{?with_python3}
 %py3_install
 # rename executables in /usr/bin so they don't collide
 mv %{buildroot}%{_bindir}/gunicorn{,-3}
@@ -77,6 +85,7 @@ ln -s %{_bindir}/gunicorn_paster-3 %{buildroot}%{_bindir}/gunicorn_paster-%{pyth
 %if ! (0%{?fedora} >= 29)
 ln -s %{_bindir}/gunicorn-3 %{buildroot}%{_bindir}/python3-gunicorn
 ln -s %{_bindir}/gunicorn_paster-3 %{buildroot}%{_bindir}/python3-gunicorn_paster
+%endif
 %endif
 %py2_install
 # rename executables in /usr/bin so they don't collide
@@ -93,7 +102,9 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 
 %check
 %{__python2} setup.py test
+%if 0%{?with_python3}
 %{__python3} setup.py test
+%endif
 
 %files -n python2-%{upstream_name}
 %license LICENSE
@@ -106,6 +117,7 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %{_bindir}/%{upstream_name}-2.7
 %{_bindir}/%{upstream_name}_paster-2.7
 
+%if 0%{?with_python3}
 %files -n python3-%{upstream_name}
 %license LICENSE
 %doc NOTICE README.rst THANKS
@@ -118,10 +130,13 @@ rm %{buildroot}%{python2_sitelib}/%{upstream_name}/workers/_gaiohttp.py*
 %{_bindir}/python3-%{upstream_name}
 %{_bindir}/python3-%{upstream_name}_paster
 %endif
+%endif
 
+%if 0%{?with_python3}
 %files doc
 %license LICENSE
 %doc build/sphinx/html/*
+%endif
 
 %changelog
 * Fri Jul 26 2019 Fedora Release Engineering <releng@fedoraproject.org> - 19.9.0-4
